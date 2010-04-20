@@ -1,3 +1,6 @@
+require 'rubygems'
+require 'xapian-fu'
+
 module Xapor
   LIB_PATH = File.join(File.dirname(__FILE__), "xapor")
 end
