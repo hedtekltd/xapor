@@ -24,7 +24,7 @@ module Xapor::XapianFuIntegration
         end
 
         def xapor_db
-          @db ||= XapianDb.new(@config.xapian_fu_db, :create => true)
+          @db ||= XapianDb.new(@config.xapian_fu_db.merge(:create => true))
         end
       end
       if defined?(ActiveRecord) && self.is_a?(ActiveRecord::Base)
