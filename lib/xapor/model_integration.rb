@@ -19,6 +19,17 @@ module Xapor::XapianFuIntegration
           xapor_db.search(query)
         end
 
+        def reset_index
+          if @db
+            @db.ro.close
+            @db.rw.close
+          end
+          @db = XapianDb.new(@config.xapian_fu_db.merge(:overwrite => true))
+          if block_given?
+            yield @db
+          end
+        end
+
         def xapor_config
           @config
         end
@@ -42,7 +53,7 @@ module Xapor::XapianFuIntegration
 
   def add_to_index
     doc = {:id => self.id}
-    config.search_fields.each do |field|
+    self.class.xapor_config.search_fields.each do |field|
       doc[field] = self.send(field.to_sym)
     end
     self.class.xapor_db << doc
