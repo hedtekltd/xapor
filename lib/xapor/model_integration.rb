@@ -24,6 +24,11 @@ module Xapor::XapianFuIntegration
           @config
         end
       end
+      if self.class.ancestors.include?(ActiveRecord::Base)
+        self.class_eval do
+          after_save :add_to_index
+        end
+      end
       @config = Xapor::Config.new
       if block_given?
         yield @config
