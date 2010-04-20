@@ -16,7 +16,7 @@ module Xapor::XapianFuIntegration
         include XapianFu
 
         def search(query)
-          @db.search(query)
+          xapor_db.search(query)
         end
 
         def xapor_config
