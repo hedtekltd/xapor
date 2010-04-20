@@ -7,3 +7,8 @@ require 'spec/autorun'
 Spec::Runner.configure do |config|
   
 end
+
+# An empty class to be used for hooking on the Xapor spec functionality
+class XaporTest
+
+end
