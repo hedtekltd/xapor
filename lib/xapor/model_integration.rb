@@ -48,6 +48,11 @@ module Xapor::XapianFuIntegration
       end
       if defined? ActiveRecord && ancestors.includes(ActiveRecord::Base)
         class_eval("after_save :add_to_index")
+        class_eval("after_destroy :remove_from_index")
+        unless @config.directory_config
+          #in-memory index, needs to be indexed on startup
+          class_eval("all.each {|o| o.add_to_index}")
+        end
       end
     end
   end
@@ -58,6 +63,11 @@ module Xapor::XapianFuIntegration
       doc[field] = self.send(field.to_sym)
     end
     self.class.xapor_db << doc
+    self.class.xapor_db.flush
+  end
+
+  def remove_from_index
+    self.class.xapor_db.documents.delete(self.id)
     self.class.xapor_db.flush
   end
 end
