@@ -1,6 +1,9 @@
 module Xapor::ModelIntegration
   def self.included(base)
     base.send(:include, Xapor::XapianFuIntegration)
+    if defined?(ActiveRecord) && base.is_a?(ActiveRecord::Base)
+      base.after_save :add_to_index
+    end
   end
 end
 
@@ -21,6 +24,7 @@ module Xapor::XapianFuIntegration
 
         def reset_index
           if @db
+            @db.flush
             @db.ro.close
             @db.rw.close
           end
@@ -37,9 +41,6 @@ module Xapor::XapianFuIntegration
         def xapor_db
           @db ||= XapianDb.new(@config.xapian_fu_db.merge(:create => true))
         end
-      end
-      if defined?(ActiveRecord) && self.is_a?(ActiveRecord::Base)
-        self.send(:after_save, :add_to_index)
       end
       @config = Xapor::Config.new
       if block_given?
