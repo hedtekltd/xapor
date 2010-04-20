@@ -1,4 +1,4 @@
-class XaporInitializerGenerator
+class XaporInitializerGenerator < Rails::Generator::Base
   def manifest
     record do |m|
       m.directory 'config/initializers'
