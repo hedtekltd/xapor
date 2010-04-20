@@ -49,3 +49,9 @@ module Xapor::XapianFuIntegration
     Delayed::Job.enqueue self
   end
 end
+
+if defined? ActiveRecord
+  ActiveRecord::Base.class_eval do
+    include Xapor::ModelIntegration
+  end
+end
