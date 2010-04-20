@@ -1,18 +1,19 @@
 h1. Xapor
 
 h2. Description
+
 Pronounced 'zap-or'. A Xapian rails plugin, designed to integrate XapianFu into ActiveRecord in a nicer,
 simpler fashion.
 
 h2. Usage
 
 To add an index to a model, simply add a block like the following:
-@class SomeModel < ActiveRecord::Base
+==<code><pre>class SomeModel < ActiveRecord::Base
   xapor do |idx|
     idx.search :name
     idx.search :description
   end
-end@
+end</pre></code>==
 
 This will create an in-memory index for the model. It will also automatically index all the items currently in the
 table and add and remove items from the index as they are created, updated and removed.
@@ -23,10 +24,10 @@ Once you have added xapor to a model, you can then search it by doing:
 
 This returns a XapianFu result set, which can be easily turned into AR models with a block like the following:
 
-@results = []
+==<code><pre>results = []
 SomeModel.search("Text").each do |result|
   results << SomeModel.find(result.id)
-end@
+end</pre></code>==
 
 h2. TODO
 
