@@ -1,9 +1,6 @@
 module Xapor::ModelIntegration
   def self.included(base)
     base.send(:include, Xapor::XapianFuIntegration)
-    if defined?(ActiveRecord) && base.is_a?(ActiveRecord::Base)
-      base.after_save :add_to_index
-    end
   end
 end
 
@@ -48,6 +45,9 @@ module Xapor::XapianFuIntegration
       end
       @config.search_fields.each do |field|
         class_eval("def self.search_by_#{field}(query)\nself.search(query)\nend")
+      end
+      if defined? ActiveRecord && ancestors.includes(ActiveRecord::Base)
+        class_eval("after_save :add_to_index")
       end
     end
   end
