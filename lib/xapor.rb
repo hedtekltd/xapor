@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'delayed_job'
 require 'xapian-fu'
 
 module Xapor

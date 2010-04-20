@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Xapor::ModelIntegration, "Search integration into a model class" do
-  include XapianFu
   it "should add a xapor function when included" do
     XaporTest.respond_to?(:xapor).should be_false
     XaporTest.send(:include, Xapor::ModelIntegration)
@@ -21,14 +20,17 @@ describe Xapor::ModelIntegration, "Search integration into a model class" do
     XaporTest.respond_to?(:search_by_name).should be_true
   end
 
-  it "should pass a directory path to XapianDb when specified in the config" do
-    pending
+  it "add a perform method for delayed job" do
     XaporTest.send(:attr_accessor, :name)
     XaporTest.send(:include, Xapor::ModelIntegration)
     XaporTest.send(:xapor) {|idx|
       idx.search :name
       idx.directory "test.db"
     }
-    XapianDb.should_receive(:new).with(hash_containing(:dir => "test.db"))
+    XaporTest.new.respond_to?(:perform).should be_true
+    test = XaporTest.new
+    test.should_receive(:id).and_return(1)
+    test.should_receive(:name).and_return("Awesome")
+    test.perform
   end
 end
