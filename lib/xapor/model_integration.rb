@@ -16,16 +16,19 @@ module Xapor::XapianFuIntegration
         include XapianFu
 
         def search(query)
-          db = XapianDb.new(@config.xapian_fu_db)
-          db.search(query)
+          @db.search(query)
         end
 
         def xapor_config
           @config
         end
+
+        def xapor_db
+          @db ||= XapianDb.new(@config.xapian_fu_db, :create => true)
+        end
       end
-      if self.ancestors.include?(ActiveRecord::Base)
-        after_save :add_to_index
+      if defined?(ActiveRecord) && self.is_a?(ActiveRecord::Base)
+        self.send(:after_save, :add_to_index)
       end
       @config = Xapor::Config.new
       if block_given?
@@ -37,19 +40,13 @@ module Xapor::XapianFuIntegration
     end
   end
 
-  def perform
-    config = self.class.xapor_config
-    db = XapianDb.new(config.xapian_fu_db.merge(:create => true))
+  def add_to_index
     doc = {:id => self.id}
     config.search_fields.each do |field|
       doc[field] = self.send(field.to_sym)
     end
-    db << doc
-    db.flush
-  end
-
-  def add_to_index
-    Delayed::Job.enqueue self
+    self.class.xapor_db << doc
+    self.class.xapor_db.flush
   end
 end
 

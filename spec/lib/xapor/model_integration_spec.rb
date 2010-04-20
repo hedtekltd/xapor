@@ -19,18 +19,4 @@ describe Xapor::ModelIntegration, "Search integration into a model class" do
     XaporTest.send(:xapor) {|idx| idx.search :name}
     XaporTest.respond_to?(:search_by_name).should be_true
   end
-
-  it "add a perform method for delayed job" do
-    XaporTest.send(:attr_accessor, :name)
-    XaporTest.send(:include, Xapor::ModelIntegration)
-    XaporTest.send(:xapor) {|idx|
-      idx.search :name
-      idx.directory "test.db"
-    }
-    XaporTest.new.respond_to?(:perform).should be_true
-    test = XaporTest.new
-    test.should_receive(:id).and_return(1)
-    test.should_receive(:name).and_return("Awesome")
-    test.perform
-  end
 end

@@ -11,7 +11,6 @@ begin
     gem.homepage = "http://github.com/hedtekltd/xapor"
     gem.authors = ["David Workman"]
     gem.add_dependency "xapian-fu", ">= 1.1.0"
-    gem.add_dependency "delayed_job", ">= 2.0.3"
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "cucumber", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
