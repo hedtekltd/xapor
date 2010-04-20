@@ -47,8 +47,5 @@ module Xapor::XapianFuIntegration
 
   def add_to_index
     Delayed::Job.enqueue self
-    Thread.new do
-      Delayed::Worker.new.start
-    end
   end
 end
