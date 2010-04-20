@@ -1,17 +1,39 @@
-= xapor
+h1. Xapor
 
-Description goes here.
+h2. Description
+Pronounced 'zap-or'. A Xapian rails plugin, designed to integrate XapianFu into ActiveRecord in a nicer,
+simpler fashion.
 
-== Note on Patches/Pull Requests
- 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+h2. Usage
 
-== Copyright
+To add an index to a model, simply add a block like the following:
+@class SomeModel < ActiveRecord::Base
+  xapor do |idx|
+    idx.search :name
+    idx.search :description
+  end
+end@
 
-Copyright (c) 2010 David Workman. See LICENSE for details.
+This will create an in-memory index for the model. It will also automatically index all the items currently in the
+table and add and remove items from the index as they are created, updated and removed.
+
+Once you have added xapor to a model, you can then search it by doing:
+
+@SomeModel.search("Some search query")@
+
+This returns a XapianFu result set, which can be easily turned into AR models with a block like the following:
+
+@results = []
+SomeModel.search("Text").each do |result|
+  results << SomeModel.find(result.id)
+end@
+
+h2. TODO
+
+* Get the indexing working with disk-based Xapian indexes
+* Sort out the ability to store and retrieve extra item data in the index and remove the need to load data from the database on every search
+* Add the ability to put in a 'xapor.yml' config file to define environment specific index settings (e.g. use memory in testing, and a different directory prefix in dev and prod)
+
+h2. Copyright
+
+Copyright (c) 2010 Hedtek Ltd. See LICENSE for details.
