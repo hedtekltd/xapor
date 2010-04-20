@@ -24,10 +24,8 @@ module Xapor::XapianFuIntegration
           @config
         end
       end
-      if self.class.ancestors.include?(ActiveRecord::Base)
-        self.class_eval do
-          after_save :add_to_index
-        end
+      if self.ancestors.include?(ActiveRecord::Base)
+        after_save :add_to_index
       end
       @config = Xapor::Config.new
       if block_given?
