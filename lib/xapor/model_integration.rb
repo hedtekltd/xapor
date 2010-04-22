@@ -36,6 +36,11 @@ module Xapor::XapianFuIntegration
         end
 
         def xapor_db
+          if !(@db || @config.directory_config)
+            reset_index do
+              all.each {|o| o.add_to_index}
+            end
+          end
           @db ||= XapianDb.new(@config.xapian_fu_db.merge(:create => true))
         end
       end
