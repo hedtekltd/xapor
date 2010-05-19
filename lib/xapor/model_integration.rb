@@ -12,13 +12,18 @@ module Xapor::XapianFuIntegration
 
   module ClassMethods
     def xapor
+      class << self
+        attr_accessor :xapor_config
+        attr_accessor :xapor_db
+      end
+      
       include XapianFu
 
-      def search(query)
+      def self.search(query)
         xapor_db.search(query)
       end
 
-      def reset_index
+      def self.reset_index
         if @db
           @db.flush
           @db.ro.close
@@ -30,11 +35,7 @@ module Xapor::XapianFuIntegration
         end
       end
 
-      def xapor_config
-        self.class.instance_variable_get(:@config)
-      end
-
-      def xapor_db
+      def self.xapor_db
         @db ||= XapianDb.new(xapor_config.xapian_fu_db.merge(:create => true))
       end
 
@@ -42,9 +43,10 @@ module Xapor::XapianFuIntegration
       if block_given?
         yield @config
       end
+      @db = XapianDb.new(self.xapor_config.xapian_fu_db.merge(:create => true))
 
       @config.search_fields.each do |field|
-        class_eval("def self.search_by_#{field}(query)\nself.search(query)\nend")
+        instance_eval("def search_by_#{field}(query)\nself.search(query)\nend")
       end
 
       if defined? ActiveRecord && ancestors.includes(ActiveRecord::Base)
