@@ -35,25 +35,26 @@ module Xapor::XapianFuIntegration
         end
       end
 
-      def self.xapor_db
-        @db ||= XapianDb.new(xapor_config.xapian_fu_db.merge(:create => true))
-      end
-
-      @config = Xapor::Config.new
+      self.xapor_config = Xapor::Config.new
       if block_given?
-        yield @config
+        yield self.xapor_config
       end
-      @db = XapianDb.new(self.xapor_config.xapian_fu_db.merge(:create => true))
+      self.xapor_db = ::XapianFu::XapianDb.new(self.xapor_config.xapian_fu_db.merge(:create => true))
 
-      @config.search_fields.each do |field|
-        instance_eval("def search_by_#{field}(query)\nself.search(query)\nend")
+      eigenclass = class << self
+        self
       end
+      self.xapor_config.search_fields.each do |field|
+          eigenclass.send(:define_method, :"search_by_#{field}") do |query|
+            self.search(query)
+          end
+        end
 
       if defined? ActiveRecord && ancestors.includes(ActiveRecord::Base)
         after_save :add_to_index
         after_destroy :remove_from_index
         #in-memory index, needs to be indexed on startup
-        all.each {|o| o.add_to_index} unless @config.directory_config
+        all.each {|o| o.add_to_index} unless self.xapor_config.directory_config
       end
     end
   end
