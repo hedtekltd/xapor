@@ -12,52 +12,46 @@ module Xapor::XapianFuIntegration
 
   module ClassMethods
     def xapor
-      class << self
-        include XapianFu
+      include XapianFu
 
-        def search(query)
-          xapor_db.search(query)
+      def search(query)
+        xapor_db.search(query)
+      end
+
+      def reset_index
+        if @db
+          @db.flush
+          @db.ro.close
+          @db.rw.close
         end
-
-        def reset_index
-          if @db
-            @db.flush
-            @db.ro.close
-            @db.rw.close
-          end
-          @db = XapianDb.new(@config.xapian_fu_db.merge(:overwrite => true))
-          if block_given?
-            yield @db
-          end
-        end
-
-        def xapor_config
-          @config
-        end
-
-        def xapor_db
-          if !(@db || @config.directory_config)
-            reset_index do
-              all.each {|o| o.add_to_index}
-            end
-          end
-          @db ||= XapianDb.new(@config.xapian_fu_db.merge(:create => true))
+        @db = XapianDb.new(xapor_config.xapian_fu_db.merge(:overwrite => true))
+        if block_given?
+          yield @db
         end
       end
+
+      def xapor_config
+        self.class.instance_variable_get(:@config)
+      end
+
+      def xapor_db
+        @db ||= XapianDb.new(xapor_config.xapian_fu_db.merge(:create => true))
+      end
+
       @config = Xapor::Config.new
       if block_given?
         yield @config
       end
+
       @config.search_fields.each do |field|
         class_eval("def self.search_by_#{field}(query)\nself.search(query)\nend")
       end
+
       if defined? ActiveRecord && ancestors.includes(ActiveRecord::Base)
-        class_eval("after_save :add_to_index")
-        class_eval("after_destroy :remove_from_index")
-        unless @config.directory_config
-          #in-memory index, needs to be indexed on startup
-          class_eval("all.each {|o| o.add_to_index}")
-        end
+        after_save :add_to_index
+        after_destroy :remove_from_index
+        #in-memory index, needs to be indexed on startup
+        all.each {|o| o.add_to_index} unless @config.directory_config
       end
     end
   end
