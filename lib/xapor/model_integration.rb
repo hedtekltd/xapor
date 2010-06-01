@@ -16,7 +16,7 @@ module Xapor::XapianFuIntegration
         attr_accessor :xapor_config
         attr_accessor :xapor_db
       end
-      
+
       include XapianFu
 
       def self.search(query)
@@ -24,14 +24,14 @@ module Xapor::XapianFuIntegration
       end
 
       def self.reset_index
-        if @db
-          @db.flush
-          @db.ro.close
-          @db.rw.close
+        if self.xapor_db
+          self.xapor_db.flush
+          self.xapor_db.ro.close
+          self.xapor_db.rw.close
         end
-        @db = XapianDb.new(xapor_config.xapian_fu_db.merge(:overwrite => true))
+        self.xapor_db = ::XapianFu::XapianDb.new(self.xapor_config.xapian_fu_db.merge(:overwrite => true))
         if block_given?
-          yield @db
+          yield self.xapor_db
         end
       end
 
@@ -45,10 +45,10 @@ module Xapor::XapianFuIntegration
         self
       end
       self.xapor_config.search_fields.each do |field|
-          eigenclass.send(:define_method, :"search_by_#{field}") do |query|
-            self.search(query)
-          end
+        eigenclass.send(:define_method, :"search_by_#{field}") do |query|
+          self.search(query)
         end
+      end
 
       if defined? ActiveRecord && ancestors.includes(ActiveRecord::Base)
         after_save :add_to_index
